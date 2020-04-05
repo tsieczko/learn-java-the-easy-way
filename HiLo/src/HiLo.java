@@ -5,12 +5,12 @@ public class HiLo {
 	public static void main(String[] args) {
 		Scanner scanner = new Scanner(System.in);
 		String playAgain = "";
-		int randomNumber = (int) (Math.random() * 100 + 1);
+		int randomNumber = (int) (Math.random() * 200 - 100 + 1);
 		int guess = 0;
 
 		do {
 			while (guess != randomNumber) {
-				System.out.print("Guess a number between 1 and 100: ");
+				System.out.print("Guess a number between -100 and 100: ");
 				guess = scanner.nextInt();
 
 				if (guess < randomNumber) {
