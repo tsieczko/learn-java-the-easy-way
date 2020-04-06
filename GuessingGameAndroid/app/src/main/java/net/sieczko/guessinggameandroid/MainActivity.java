@@ -1,23 +1,20 @@
 package net.sieczko.guessinggameandroid;
 
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
+import android.preference.PreferenceManager;
+import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-
-import android.view.KeyEvent;
-import android.view.MenuInflater;
-import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
     private EditText txtGuess;
@@ -53,6 +50,9 @@ public class MainActivity extends AppCompatActivity {
 
         lblRange = (TextView) findViewById(R.id.lblPrompt);
 
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        range = preferences.getInt("range", 100);
+
         newGame();
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -79,17 +79,16 @@ public class MainActivity extends AppCompatActivity {
                         switch (item) {
                             case 0:
                                 range = 10;
-                                newGame();
                                 break;
                             case 1:
                                 range = 100;
-                                newGame();
                                 break;
                             case 2:
                                 range = 1000;
-                                newGame();
                                 break;
                         }
+                        storeRange(range);
+                        newGame();
                         dialog.dismiss();
                     }
                 });
@@ -98,7 +97,21 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             case R.id.action_newgame:
                 newGame();
+                return true;
             case R.id.action_gamestats:
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+                int gamesWon = preferences.getInt("gamesWon", 0);
+                AlertDialog statDialog = new AlertDialog.Builder(MainActivity.this).create();
+                statDialog.setTitle("Guessing Game Starts");
+                statDialog.setMessage("You have won " + gamesWon + " games. Way to go!");
+                statDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                statDialog.show();
                 return true;
             case R.id.action_about:
                 AlertDialog aboutDialog = new AlertDialog.Builder(MainActivity.this).create();
@@ -139,6 +152,11 @@ public class MainActivity extends AppCompatActivity {
             }
             if (guess == randomNumber) {
                 message = guess + " is correct. You win! Let's play again!";
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+                int gamesWon = preferences.getInt("gamesWon", 0) + 1;
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putInt("gamesWon", gamesWon);
+                editor.apply();
                 newGame();
             }
 
@@ -150,4 +168,12 @@ public class MainActivity extends AppCompatActivity {
             txtGuess.selectAll();
         }
     }
+
+    public void storeRange(int newRange) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putInt("range", newRange);
+        editor.apply();
+    }
+
 }
